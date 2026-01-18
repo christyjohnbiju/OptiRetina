@@ -54,7 +54,7 @@ export default function UploadPage() {
         setProgress(prev => Math.min(prev + 10, 90));
       }, 500);
 
-      const res = await axios.post('http://localhost:8001/analyze', formData, {
+      const res = await axios.post('http://localhost:8000/analyze', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 

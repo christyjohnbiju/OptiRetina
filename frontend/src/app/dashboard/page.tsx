@@ -24,7 +24,7 @@ export default function DashboardPage() {
     // Fetch history
     const fetchHistory = async () => {
         try {
-            const res = await axios.get('http://localhost:8001/history');
+            const res = await axios.get('http://localhost:8000/history');
             const data = res.data;
             setHistory(data);
             

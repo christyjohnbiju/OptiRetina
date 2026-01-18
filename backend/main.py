@@ -69,14 +69,19 @@ def upload_to_supabase(file_path: str, bucket: str, destination_name: str, conte
 
 # Initialize Model (Global load)
 print("Initializing AI Model...")
-dr_model = DRModel("mobilenetv3_fold_3.keras")
+# Initialize Model (Ensemble load)
+print("Initializing AI Ensemble...")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_DIR = os.path.join(BASE_DIR, "models")
+dr_model = DRModel(MODEL_DIR)
 
 HEALTH_TIPS = {
     "No_DR": ["Maintain healthy diet.", "Yearly eye exams.", "Regular exercise."],
     "Mild": ["Control blood sugar strictly.", "Monitor blood pressure.", "Follow up in 6-12 months."],
     "Moderate": ["Consult retina specialist.", "Consider laser therapy if needed.", "More frequent checkups (3-6 months)."],
     "Severe": ["Urgent ophthalmology referral.", "Glycemic control is critical.", "Possible surgical intervention."],
-    "Proliferate_DR": ["Immediate treatment required.", "High risk of vision loss.", "Anti-VEGF or Pan-retinal photocoagulation."]
+    "Proliferate_DR": ["Immediate treatment required.", "High risk of vision loss.", "Anti-VEGF or Pan-retinal photocoagulation."],
+    "Uncertain": ["Low confidence – requires ophthalmologist review.", "Please retake the image to ensure quality.", "Consult a doctor for manual diagnosis."]
 }
 
 @app.get("/health")

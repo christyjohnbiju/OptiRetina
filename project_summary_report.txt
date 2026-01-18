@@ -1,0 +1,82 @@
+PROJECT TECHNICAL REPORT: OptiRetina - Diabetic Retinopathy Detection System
+=============================================================================
+
+1. PROJECT OVERVIEW
+-------------------
+OptiRetina is an AI-powered diagnostic support tool designed to detect and grade Diabetic Retinopathy (DR) from retinal fundus images. It utilizes an ensemble of Deep Learning models to provide high-accuracy predictions along with explainable visual attention maps (Grad-CAM).
+
+2. TECHNOLOGY STACK
+-------------------
+A. Programming Languages:
+   - Python (v3.10+): Core logic, AI inference, and Backend API.
+   - TypeScript / JavaScript: Frontend user interface and logic.
+
+B. Frameworks & Libraries:
+   - Backend: FastAPI (Python) - chosen for high performance and async support.
+   - Frontend: Next.js 16 (React) - for server-side rendering and responsive UI.
+   - Styling: TailwindCSS, Shadcn/UI (Radix Primitives).
+   - HTTP Client: Axios.
+
+C. Deep Learning & Computer Vision:
+   - TensorFlow / Keras 3.x: Model loading and inference.
+   - OpenCV (cv2): Image manipulation, resizing, and heatmap generation.
+   - NumPy: High-speed matrix operations for soft-voting ensemble logic.
+   - Pillow (PIL): Basic image handling.
+
+D. Infrastructure:
+   - Database: Supabase (PostgreSQL).
+   - Storage: Supabase Storage (S3-compatible bucket) for images and PDF reports.
+   - Authentication: NextAuth.js (integrated with Supabase Auth).
+
+3. AI & ML TECHNIQUES USED
+--------------------------
+A. Model Architecture:
+   - **MobileNetV3**: Used as the backbone for its efficiency and lightweight nature, suitable for deployment.
+
+B. Ensemble Learning (Soft Voting):
+   - Instead of relying on a single model, the system loads **5 models** trained via K-Fold Cross Validation.
+   - **Mechanism**:
+     1. The input image is preprocessed and fed into all 5 models simultaneously.
+     2. Each model outputs a probability distribution across the 5 classes (No_DR, Mild, Moderate, Severe, Proliferative).
+     3. **Soft Voting**: The system calculates the arithmetic mean of these probabilities.
+     4. The class with the highest average probability is selected as the final prediction.
+   - **Benefit**: Reduces model variance and improves generalization, making the system more robust to noise.
+
+C. Explainable AI (Grad-CAM):
+   - **Gradient-weighted Class Activation Mapping (Grad-CAM)** is implemented to visualize decision-making.
+   - It computes the gradients of the target class score with respect to the feature maps of the last convolutional layer (`conv_1`).
+   - A heatmap is generated and overlaid on the original image to show which parts of the retina contributed most to the diagnosis (e.g., hemorrhages, exudates).
+
+D. Preprocessing Pipeline:
+   1. **Noise Reduction**: Checks Signal-to-Noise Ratio (SNR). Applies Gaussian Blur if image quality is low.
+   2. **Resizing**: Standardizes inputs to 224x224 pixels.
+   3. **Normalization**: Scales pixel values to the range [-1, 1] to match training conditions.
+
+4. DATABASE STRUCTURE (Supabase PostgreSQL)
+-------------------------------------------
+Table Name: `analysis_history`
+
+| Field Name   | Data Type | Description                              |
+|--------------|-----------|------------------------------------------|
+| id           | UUID      | Primary Key, Unique Record ID            |
+| user_email   | Text      | Identifier for the patient or doctor     |
+| filename     | Text      | Original name of the uploaded file       |
+| prediction   | Text      | Predicted Grade (e.g., "Moderate")       |
+| confidence   | Float     | Confidence score (0.0 to 1.0)            |
+| is_noisy     | Boolean   | True if the image required cleaning      |
+| tips         | Array     | List of medical recommendations generated|
+| report_url   | Text      | URL to the generated PDF download        |
+| image_url    | Text      | URL to the uploaded fundus image         |
+| created_at   | Timestamp | Auto-generated record creation time      |
+
+5. WORKFLOW SUMMARY
+-------------------
+1. User uploads an image via the Next.js Frontend.
+2. Image is sent to FastAPI Backend (`POST /analyze`).
+3. Backend preprocesses the image (Noise check -> Resize -> Normalize).
+4. Ensemble Inference runs on 5 Keras models.
+5. Grad-CAM heatmap is generated for the top predicted class.
+6. A PDF Report is generated using `ReportLab`.
+7. Original image and PDF are uploaded to Supabase Storage.
+8. Clinical metadata is saved to the Supabase Database.
+9. Results are returned to the frontend for display.

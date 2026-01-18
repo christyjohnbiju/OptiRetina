@@ -1,0 +1,8 @@
+--- TEST 1: FLOAT32 ---
+In (float): [[[  0.  127.5 255. ]]]
+Out: [[[  0.  127.5 255. ]]]
+
+--- TEST 2: UINT8 ---
+In (uint8): [[[  0 127 255]]]
+Out: [[[  0 127 255]]]
+CONCLUSION: uint8 input does NOT trigger rescaling.

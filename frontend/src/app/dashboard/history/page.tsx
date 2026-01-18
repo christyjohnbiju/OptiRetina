@@ -25,7 +25,7 @@ export default function HistoryPage() {
   useEffect(() => {
     const fetchHistory = async () => {
         try {
-            const res = await axios.get('http://localhost:8001/history');
+            const res = await axios.get('http://localhost:8000/history');
             setHistory(res.data);
             setFiltered(res.data);
         } catch (e) {
