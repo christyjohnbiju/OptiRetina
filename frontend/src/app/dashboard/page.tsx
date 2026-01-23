@@ -12,11 +12,14 @@ interface Record {
   filename: string;
   prediction: string;
   confidence: number;
-  date: string;
+  created_at: string;
   report_url: string;
 }
 
+import { useAuth } from "@clerk/nextjs";
+
 export default function DashboardPage() {
+  const { getToken } = useAuth();
   const [history, setHistory] = useState<Record[]>([]);
   const [stats, setStats] = useState({ total: 0, healthy: 0, dr: 0 });
 
@@ -24,7 +27,10 @@ export default function DashboardPage() {
     // Fetch history
     const fetchHistory = async () => {
         try {
-            const res = await axios.get('http://localhost:8000/history');
+            const token = await getToken();
+            const res = await axios.get('http://localhost:8000/history', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             const data = res.data;
             setHistory(data);
             
@@ -100,7 +106,7 @@ export default function DashboardPage() {
                                 <div className={`w-2 h-12 rounded-full ${rec.prediction === 'No_DR' ? 'bg-green-500' : 'bg-red-500'}`}></div>
                                 <div>
                                     <p className="font-semibold text-slate-800">{rec.prediction.replace('_', ' ')}</p>
-                                    <p className="text-sm text-slate-500">{new Date(rec.date).toLocaleString()}</p>
+                                    <p className="text-sm text-slate-500">{new Date(rec.created_at).toLocaleString()}</p>
                                 </div>
                             </div>
                             <div className="flex items-center space-x-4">

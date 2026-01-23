@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -88,26 +88,54 @@ HEALTH_TIPS = {
 def health_check():
     return {
         "status": "ok", 
-        "model_loaded": dr_model.model is not None,
+        "model_loaded": len(dr_model.models) > 0,
         "supabase_connected": supabase is not None
     }
 
+from auth_dependency import get_current_user_id
+
 @app.get("/history")
-def get_history():
+def get_history(user_id: str = Depends(get_current_user_id)):
     if not supabase:
-        # Fallback to empty or local logic if needed, but for now returned empty
         return []
     
     try:
-        # Fetch from 'analysis_history' table
-        response = supabase.table("analysis_history").select("*").order("created_at", desc=True).execute()
+        # Fetch from 'analysis_history' table, filtered by user_id
+        response = supabase.table("analysis_history").select("*").eq("clerk_user_id", user_id).order("created_at", desc=True).execute()
         return response.data
     except Exception as e:
         print(f"Fetch history failed: {e}")
         return []
 
+def get_clerk_email(user_id: str):
+    """Fetch user logic from Clerk Backend API"""
+    clerk_key = os.environ.get("CLERK_SECRET_KEY")
+    if not clerk_key:
+        return "Unknown"
+    
+    try:
+        import requests
+        headers = {"Authorization": f"Bearer {clerk_key}"}
+        resp = requests.get(f"https://api.clerk.com/v1/users/{user_id}", headers=headers)
+        if resp.status_code == 200:
+            data = resp.json()
+            # Return primary email
+            for email in data.get("email_addresses", []):
+                if email.get("id") == data.get("primary_email_address_id"):
+                    return email.get("email_address")
+                # Fallback to first
+            if data.get("email_addresses"):
+                return data["email_addresses"][0]["email_address"]
+    except Exception as e:
+        print(f"Clerk API Error: {e}")
+    return "Unknown"
+
 @app.post("/analyze")
-async def analyze_retina(file: UploadFile = File(...), patient_id: str = "Anonymous"):
+async def analyze_retina(
+    file: UploadFile = File(...), 
+    patient_id: str = "Anonymous", # Legacy: Frontend might send this, but we prefer Clerk Email
+    user_id: str = Depends(get_current_user_id)
+):
     try:
         # 1. Save upload temporarily
         content = await file.read()
@@ -133,24 +161,19 @@ async def analyze_retina(file: UploadFile = File(...), patient_id: str = "Anonym
         pdf_filename = f"report_{file_id}.pdf"
         pdf_path = os.path.join(REPORT_DIR, pdf_filename)
         
+        # Determine User Email for Report/DB
+        user_email = patient_id
+        if user_email == "Anonymous" or user_email == "undefined":
+            # Try to fetch from Clerk
+            fetched_email = get_clerk_email(user_id)
+            if fetched_email != "Unknown":
+                user_email = fetched_email
         
-        generate_pdf(patient_id, label, confidence, processed_img_cv2, gradcam_img, tips, pdf_path)
+        generate_pdf(user_email, label, confidence, processed_img_cv2, gradcam_img, tips, pdf_path)
         
-        # Save to History
+        # Save to History (In-Memory/Local)
         import json
         timestamp = datetime.datetime.now().isoformat()
-        record = {
-            "id": file_id,
-            "filename": file.filename,
-            "prediction": label,
-            "confidence": confidence,
-            "tips": tips,
-            "report_url": f"/reports/{pdf_filename}",
-            "image_url": f"/uploads/{filename}",
-            "date": timestamp,
-            "is_noisy": bool(is_noisy)
-        }
-        
         
         # 5. Upload to Supabase Storage
         image_public_url = None
@@ -158,36 +181,46 @@ async def analyze_retina(file: UploadFile = File(...), patient_id: str = "Anonym
         
         if supabase:
             # Upload Original Image
-            # Determine content type
             mime_type, _ = mimetypes.guess_type(file.filename)
             if not mime_type: mime_type = "image/png"
             
-            # Using the saved temp file for upload is easiest
             original_url = upload_to_supabase(file_path, "uploads", filename, mime_type)
-            image_public_url = original_url if original_url else f"/uploads/{filename}" # Fallback? No, just broken link if fails
+            image_public_url = original_url if original_url else f"/uploads/{filename}"
 
             # Upload Report PDF
             pdf_url = upload_to_supabase(pdf_path, "reports", pdf_filename, "application/pdf")
             pdf_public_url = pdf_url if pdf_url else f"/reports/{pdf_filename}"
         
         else:
-            # Fallback (should not happen if key provided)
             print("Supabase not active, skipping upload.")
             image_public_url = "error_no_db"
             pdf_public_url = "error_no_db"
 
         # 6. Save to Supabase Database
         if supabase:
+            # Sync User to 'users' table
+            try:
+                # Upsert user to ensure they exist in our DB
+                user_record = {
+                    "id": user_id,
+                    "email": user_email,
+                    "updated_at": datetime.datetime.now().isoformat()
+                }
+                supabase.table("users").upsert(user_record).execute()
+            except Exception as e:
+                print(f"User sync to 'users' table failed (Table might fail or strict schema): {e}")
+
+            # Save Analysis Record
             record = {
-                "user_email": patient_id, # Using patient_id as email/user identifier per user request logic
+                "user_email": user_email, 
+                "clerk_user_id": user_id, 
                 "filename": file.filename,
                 "prediction": label,
                 "confidence": float(confidence),
                 "is_noisy": bool(is_noisy),
-                "tips": tips, # Supabase array(text)
+                "tips": tips, 
                 "report_url": pdf_public_url,
                 "image_url": image_public_url
-                # created_at is auto
             }
             try:
                 supabase.table("analysis_history").insert(record).execute()
@@ -195,14 +228,12 @@ async def analyze_retina(file: UploadFile = File(...), patient_id: str = "Anonym
             except Exception as e:
                 print(f"DB Insert failed: {e}")
 
-        # Cleanup Temp Files? optional, but good for serverless. We keep for now for debug.
-
         return JSONResponse({
             "success": True,
             "prediction": label,
             "confidence": confidence,
             "is_noisy": bool(is_noisy),
-            "report_url": pdf_public_url, # Frontend uses this link
+            "report_url": pdf_public_url, 
             "image_url": image_public_url,
             "tips": tips
         })

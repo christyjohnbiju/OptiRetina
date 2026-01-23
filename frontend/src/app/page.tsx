@@ -22,11 +22,11 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 overflow-hidden">
+      <section className="relative pt-24 pb-12 md:pt-32 md:pb-20 lg:pt-48 lg:pb-32 px-6 overflow-hidden">
         {/* Abstract Background */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
-            <div className="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] mix-blend-screen animate-pulse"></div>
-            <div className="absolute top-[30%] right-[10%] w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-[100px] mix-blend-screen"></div>
+            <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-blue-600/20 rounded-full blur-[80px] md:blur-[120px] mix-blend-screen animate-pulse"></div>
+            <div className="absolute top-[30%] right-[10%] w-[250px] h-[250px] md:w-[400px] md:h-[400px] bg-teal-500/10 rounded-full blur-[60px] md:blur-[100px] mix-blend-screen"></div>
         </div>
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
@@ -38,23 +38,23 @@ export default function Home() {
                 Now powered by MobileNetV3
             </div>
             
-            <h1 className="text-5xl lg:text-7xl font-bold tracking-tight mb-8 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-8 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
                 AI-Driven Vision <br/>
                 <span className="text-blue-500">Diagnostics</span>
             </h1>
             
-            <p className="text-lg text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed px-4">
                 Early detection of Diabetic Retinopathy made accessible. Upload fundus images and get instant, explainable grading reports.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Link href="/login">
-                    <Button className="bg-blue-600 hover:bg-blue-500 text-white px-8 h-12 rounded-full font-medium transition-all hover:scale-105 shadow-lg shadow-blue-900/20">
+                <Link href="/login" className="w-full sm:w-auto">
+                    <Button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 h-12 rounded-full font-medium transition-all hover:scale-105 shadow-lg shadow-blue-900/20">
                         Start Analysis <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                 </Link>
-                <Link href="#features">
-                    <Button variant="outline" className="border-white/10 bg-white/5 hover:bg-white/10 text-white h-12 rounded-full px-8 backdrop-blur-sm">
+                <Link href="#features" className="w-full sm:w-auto">
+                    <Button variant="outline" className="w-full sm:w-auto border-white/10 bg-white/5 hover:bg-white/10 text-white h-12 rounded-full px-8 backdrop-blur-sm">
                         Learn More
                     </Button>
                 </Link>

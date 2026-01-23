@@ -7,17 +7,20 @@ import { FileText, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import axios from 'axios';
 
+import { useAuth } from "@clerk/nextjs";
+
 interface Record {
   id: string;
   filename: string;
   prediction: string;
   confidence: number;
-  date: string;
+  created_at: string;
   report_url: string;
   is_noisy: boolean;
 }
 
 export default function HistoryPage() {
+  const { getToken } = useAuth();
   const [history, setHistory] = useState<Record[]>([]);
   const [filtered, setFiltered] = useState<Record[]>([]);
   const [search, setSearch] = useState('');
@@ -25,7 +28,10 @@ export default function HistoryPage() {
   useEffect(() => {
     const fetchHistory = async () => {
         try {
-            const res = await axios.get('http://localhost:8000/history');
+            const token = await getToken();
+            const res = await axios.get('http://localhost:8000/history', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             setHistory(res.data);
             setFiltered(res.data);
         } catch (e) {
@@ -33,7 +39,7 @@ export default function HistoryPage() {
         }
     };
     fetchHistory();
-  }, []);
+  }, [getToken]);
 
   useEffect(() => {
     const lower = search.toLowerCase();
@@ -83,7 +89,7 @@ export default function HistoryPage() {
                         <tbody>
                             {filtered.map((rec) => (
                                 <tr key={rec.id} className="border-b last:border-0 hover:bg-slate-50 transition-colors">
-                                    <td className="px-4 py-3">{new Date(rec.date).toLocaleString()}</td>
+                                    <td className="px-4 py-3">{new Date(rec.created_at).toLocaleString()}</td>
                                     <td className="px-4 py-3 font-medium text-slate-700">{rec.filename}</td>
                                     <td className="px-4 py-3">
                                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${rec.prediction === 'No_DR' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>

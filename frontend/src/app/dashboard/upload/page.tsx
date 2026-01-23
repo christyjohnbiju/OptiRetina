@@ -17,10 +17,11 @@ interface Result {
   tips: string[];
 }
 
-import { useSession } from "next-auth/react";
+import { useUser, useAuth } from "@clerk/nextjs";
 
 export default function UploadPage() {
-  const { data: session } = useSession();
+  const { user } = useUser();
+  const { getToken } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -45,8 +46,8 @@ export default function UploadPage() {
     
     const formData = new FormData();
     formData.append('file', file);
-    // Use session email or fallback
-    formData.append('patient_id', session?.user?.email || 'Anonymous'); 
+    // Use Clerk user ID or email
+    formData.append('patient_id', user?.primaryEmailAddress?.emailAddress || user?.id || 'Anonymous'); 
 
     try {
       // Simulate progress
@@ -54,8 +55,12 @@ export default function UploadPage() {
         setProgress(prev => Math.min(prev + 10, 90));
       }, 500);
 
+      const token = await getToken();
       const res = await axios.post('http://localhost:8000/analyze', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${token}`
+        }
       });
 
       clearInterval(interval);

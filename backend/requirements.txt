@@ -8,3 +8,6 @@ opencv-python-headless
 reportlab
 supabase
 python-dotenv
+requests
+pyjwt
+cryptography
