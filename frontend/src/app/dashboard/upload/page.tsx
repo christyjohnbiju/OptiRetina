@@ -55,9 +55,10 @@ export default function UploadPage() {
         setProgress(prev => Math.min(prev + 10, 90));
       }, 500);
 
+
       const token = await getToken();
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-            const res = await axios.post(`${API_URL}/analyze`, formData, {
+      const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/$/, '');
+      const res = await axios.post(`${API_URL}/analyze`, formData, {
         headers: { 
             'Content-Type': 'multipart/form-data',
             'Authorization': `Bearer ${token}`
