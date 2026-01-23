@@ -84,6 +84,10 @@ HEALTH_TIPS = {
     "Uncertain": ["Low confidence – requires ophthalmologist review.", "Please retake the image to ensure quality.", "Consult a doctor for manual diagnosis."]
 }
 
+@app.get("/")
+def read_root():
+    return {"message": "OptiRetina Backend is running. Visit /docs for API documentation."}
+
 @app.get("/health")
 def health_check():
     return {
