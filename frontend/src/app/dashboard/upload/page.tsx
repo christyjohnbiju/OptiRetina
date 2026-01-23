@@ -57,7 +57,10 @@ export default function UploadPage() {
 
 
       const token = await getToken();
-      const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/$/, '');
+      const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
+      console.log("DEBUG: Raw Env Var:", process.env.NEXT_PUBLIC_API_URL);
+      console.log("DEBUG: Final API_URL:", API_URL);
+      
       const res = await axios.post(`${API_URL}/analyze`, formData, {
         headers: { 
             'Content-Type': 'multipart/form-data',
