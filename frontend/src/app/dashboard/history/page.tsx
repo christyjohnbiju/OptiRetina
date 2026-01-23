@@ -29,7 +29,7 @@ export default function HistoryPage() {
     const fetchHistory = async () => {
         try {
             const token = await getToken();
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/$/, '');
             const res = await axios.get(`${API_URL}/history`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
