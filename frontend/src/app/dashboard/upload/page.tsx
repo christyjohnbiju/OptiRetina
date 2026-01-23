@@ -56,7 +56,8 @@ export default function UploadPage() {
       }, 500);
 
       const token = await getToken();
-      const res = await axios.post('http://localhost:8000/analyze', formData, {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const res = await axios.post(`${API_URL}/analyze`, formData, {
         headers: { 
             'Content-Type': 'multipart/form-data',
             'Authorization': `Bearer ${token}`

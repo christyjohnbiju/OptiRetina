@@ -28,7 +28,8 @@ export default function DashboardPage() {
     const fetchHistory = async () => {
         try {
             const token = await getToken();
-            const res = await axios.get('http://localhost:8000/history', {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const res = await axios.get(`${API_URL}/history`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = res.data;
