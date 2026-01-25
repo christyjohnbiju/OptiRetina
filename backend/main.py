@@ -17,6 +17,9 @@ load_dotenv()
 from preprocessing import preprocess_image
 from ml_model import DRModel
 from report_utils import generate_pdf
+from chatbot_service import ChatbotService
+from pydantic import BaseModel
+from typing import List, Optional
 
 app = FastAPI(title="OptiRetina Backend")
 
@@ -74,6 +77,7 @@ print("Initializing AI Ensemble...")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, "models")
 dr_model = DRModel(MODEL_DIR)
+chatbot_service = ChatbotService()
 
 HEALTH_TIPS = {
     "No_DR": ["Maintain healthy diet.", "Yearly eye exams.", "Regular exercise."],
@@ -172,7 +176,13 @@ async def analyze_retina(
             fetched_email = get_clerk_email(user_id)
             if fetched_email != "Unknown":
                 user_email = fetched_email
-        
+
+        # Final DB Email (Ensure Uniqueness)
+        db_email = user_email
+        if db_email in ["Anonymous", "undefined", "Unknown"]:
+            # Generate unique placeholder to satisfy DB Unique constraint
+            db_email = f"anonymous_{user_id}@optiretina.local"
+
         generate_pdf(user_email, label, confidence, processed_img_cv2, gradcam_img, tips, pdf_path)
         
         # Save to History (In-Memory/Local)
@@ -207,7 +217,7 @@ async def analyze_retina(
                 # Upsert user to ensure they exist in our DB
                 user_record = {
                     "id": user_id,
-                    "email": user_email,
+                    "email": db_email,
                     "updated_at": datetime.datetime.now().isoformat()
                 }
                 supabase.table("users").upsert(user_record).execute()
@@ -216,7 +226,7 @@ async def analyze_retina(
 
             # Save Analysis Record
             record = {
-                "user_email": user_email, 
+                "user_email": db_email, 
                 "clerk_user_id": user_id, 
                 "filename": file.filename,
                 "prediction": label,
@@ -245,6 +255,21 @@ async def analyze_retina(
     except Exception as e:
         import traceback
         traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Chatbot Endpoint
+class ChatRequest(BaseModel):
+    query: str
+    context: dict
+
+@app.post("/chatbot/query")
+async def chat_query(request: ChatRequest, user_id: str = Depends(get_current_user_id)):
+    try:
+        response = chatbot_service.get_response(request.query, request.context)
+        return {"response": response}
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

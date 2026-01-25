@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { CloudUpload, AlertCircle, CheckCircle, FileText, Loader2 } from "lucide-react";
+import { CloudUpload, AlertCircle, CheckCircle, FileText, Loader2, FileBarChart, MessageSquare } from "lucide-react";
 import axios from 'axios';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Chatbot } from "@/components/Chatbot";
 
 interface Result {
   prediction: string;
@@ -95,7 +97,7 @@ export default function UploadPage() {
             <CardDescription>Select a retinal image to analyze.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className={`border-2 border-dashed rounded-lg p-10 flex flex-col items-center justify-center text-center hover:bg-slate-50 transition-colors ${file ? 'border-blue-500' : 'border-slate-300'}`}>
+            <div className={`border-2 border-dashed rounded-lg p-6 md:p-10 flex flex-col items-center justify-center text-center hover:bg-slate-50 transition-colors ${file ? 'border-blue-500' : 'border-slate-300'}`}>
                 {preview ? (
                     <img src={preview} alt="Preview" className="max-h-64 object-contain rounded mb-4" />
                 ) : (
@@ -140,42 +142,59 @@ export default function UploadPage() {
         {/* Results Section */}
         {result && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <Card className={`border-l-4 ${result.prediction === 'No_DR' ? 'border-l-green-500' : 'border-l-red-500'}`}>
-                    <CardHeader>
-                        <CardTitle className="flex items-center space-x-2">
-                            {result.prediction === 'No_DR' ? (
-                                <CheckCircle className="text-green-500 h-6 w-6" />
-                            ) : (
-                                <AlertCircle className="text-red-500 h-6 w-6" />
-                            )}
-                            <span>Analysis Result: {result.prediction.replace('_', ' ')}</span>
-                        </CardTitle>
-                        <CardDescription>Confidence Score: {(result.confidence * 100).toFixed(2)}%</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid gap-2">
-                            <h4 className="font-semibold text-sm text-slate-700">Medical Recommendations:</h4>
-                            <ul className="list-disc list-inside text-sm text-slate-600 space-y-1">
-                                {result.tips.map((tip, i) => (
-                                    <li key={i}>{tip}</li>
-                                ))}
-                            </ul>
-                        </div>
-                        
-                        {result.is_noisy && (
-                            <div className="bg-yellow-50 text-yellow-800 p-3 rounded text-sm border border-yellow-200">
-                                ⚠️ Low image quality detected. Preprocessing applied logic to enhance clarity.
-                            </div>
-                        )}
-                    </CardContent>
-                    <CardFooter>
-                        <a href={result.report_url} target="_blank" rel="noopener noreferrer" className="w-full">
-                            <Button variant="outline" className="w-full">
-                                <FileText className="mr-2 h-4 w-4 text-blue-600" /> Download Full PDF Report
-                            </Button>
-                        </a>
-                    </CardFooter>
-                </Card>
+                <Tabs defaultValue="report" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="report" className="flex items-center"><FileBarChart className="w-4 h-4 mr-2"/>Analysis Report</TabsTrigger>
+                        <TabsTrigger value="assistant" className="flex items-center"><MessageSquare className="w-4 h-4 mr-2"/>AI Assistant</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="report">
+                        <Card className={`border-l-4 ${result.prediction === 'No_DR' ? 'border-l-green-500' : 'border-l-red-500'}`}>
+                            <CardHeader>
+                                <CardTitle className="flex items-center space-x-2">
+                                    {result.prediction === 'No_DR' ? (
+                                        <CheckCircle className="text-green-500 h-6 w-6" />
+                                    ) : (
+                                        <AlertCircle className="text-red-500 h-6 w-6" />
+                                    )}
+                                    <span>Analysis Result: {result.prediction.replace('_', ' ')}</span>
+                                </CardTitle>
+                                <CardDescription>Confidence Score: {(result.confidence * 100).toFixed(2)}%</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="grid gap-2">
+                                    <h4 className="font-semibold text-sm text-slate-700">Medical Recommendations:</h4>
+                                    <ul className="list-disc list-inside text-sm text-slate-600 space-y-1">
+                                        {result.tips.map((tip, i) => (
+                                            <li key={i}>{tip}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                                
+                                {result.is_noisy && (
+                                    <div className="bg-yellow-50 text-yellow-800 p-3 rounded text-sm border border-yellow-200">
+                                        ⚠️ Low image quality detected. Preprocessing applied logic to enhance clarity.
+                                    </div>
+                                )}
+                            </CardContent>
+                            <CardFooter>
+                                <a href={result.report_url} target="_blank" rel="noopener noreferrer" className="w-full">
+                                    <Button variant="outline" className="w-full">
+                                        <FileText className="mr-2 h-4 w-4 text-blue-600" /> Download Full PDF Report
+                                    </Button>
+                                </a>
+                            </CardFooter>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="assistant">
+                        <Chatbot 
+                            prediction={result.prediction} 
+                            confidence={result.confidence} 
+                            tips={result.tips} 
+                        />
+                    </TabsContent>
+                </Tabs>
             </div>
         )}
       </div>

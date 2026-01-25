@@ -1,7 +1,7 @@
 fastapi
 uvicorn
 python-multipart
-tensorflow-cpu
+tensorflow-cpu>=2.16.1
 numpy
 pillow
 opencv-python-headless
@@ -11,3 +11,4 @@ python-dotenv
 requests
 pyjwt
 cryptography
+openai
