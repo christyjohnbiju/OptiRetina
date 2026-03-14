@@ -19,11 +19,14 @@ interface Record {
 import { useAuth } from "@clerk/nextjs";
 
 export default function DashboardPage() {
-  const { getToken } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
   const [history, setHistory] = useState<Record[]>([]);
   const [stats, setStats] = useState({ total: 0, healthy: 0, dr: 0 });
 
   useEffect(() => {
+    // Wait until Clerk is loaded and user is signed in
+    if (!isLoaded || !isSignedIn) return;
+
     // Fetch history
     const fetchHistory = async () => {
         try {
@@ -45,7 +48,7 @@ export default function DashboardPage() {
         }
     };
     fetchHistory();
-  }, []);
+  }, [isLoaded, isSignedIn, getToken]);
 
   return (
     <div className="space-y-6">

@@ -35,7 +35,7 @@ export default function Home() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                 </span>
-                Now powered by MobileNetV3
+                Now powered by ResNet50
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-8 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
@@ -69,7 +69,7 @@ export default function Home() {
                 <FeatureCard 
                     icon={<Cpu className="h-6 w-6 text-blue-400" />}
                     title="Deep Learning"
-                    desc="Utilizes MobileNetV3 architecture optimized for efficient and accurate medical imaging inference."
+                    desc="Utilizes ResNet50 architecture for high-accuracy medical imaging inference."
                 />
                 <FeatureCard 
                     icon={<Activity className="h-6 w-6 text-teal-400" />}

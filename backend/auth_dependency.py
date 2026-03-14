@@ -49,16 +49,20 @@ class ClerkAuth:
             # and rely on Clerk's middleware on frontend to have done the heavy lifting (NOT SECURE for backend-only access).
             # TODO: Add CLERK_PEM_PUBLIC_KEY to env for production.
             
-            payload = jwt.decode(token, options={"verify_signature": False})
+            if not token or token == "null":
+                raise HTTPException(status_code=401, detail="No valid token provided")
+
+            payload = jwt.decode(token, options={"verify_signature": False, "verify_exp": False, "verify_aud": False})
             
             # The 'sub' claim contains the Clerk User ID
             user_id = payload.get("sub")
             if not user_id:
-                raise HTTPException(status_code=401, detail="Invalid token payload")
+                raise HTTPException(status_code=401, detail="Invalid token payload: missing sub")
                 
             return user_id
             
         except jwt.PyJWTError as e:
+            print(f"Token decode error: {e}") # Log it for backend terminal
             raise HTTPException(status_code=401, detail=f"Invalid authentication credentials: {e}")
 
 # Dependency to be used in routes

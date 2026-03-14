@@ -13,77 +13,78 @@ CLASSES = [
 ]
 
 class DRModel:
-    def __init__(self, model_dir="models"):
-        self.models = []
+    def __init__(self, model_dir="new_models"):
+        self.model = None
         self.model_dir = model_dir
-        self.load_ensemble()
+        self.load_model()
         
-        # Use the first model for Grad-CAM visualization
-        self.viz_model = self.models[0] if self.models else None
+        # Use the model for Grad-CAM visualization
+        self.viz_model = self.model
         self.last_conv_layer_name = None
 
         if self.viz_model:
             self.last_conv_layer_name = self.find_last_conv_layer(self.viz_model)
-            print("Last Conv Layer for Grad-CAM (Model 1):", self.last_conv_layer_name)
+            print("Last Conv Layer for Grad-CAM:", self.last_conv_layer_name)
 
     # -------------------------------
-    # Load 5 Models
+    # Load ResNet50 Fold 4 (Best Accuracy)
     # -------------------------------
-    def load_ensemble(self):
-        print("Loading ensemble models...")
-        model_files = [
-            "mobilenetv3_fold_1.keras",
-            "mobilenetv3_fold_2.keras",
-            "mobilenetv3_fold_3.keras",
-            "mobilenetv3_fold_4.keras",
-            "mobilenetv3_fold_5.keras"
-        ]
+    def load_model(self):
+        print("Loading ResNet50 Fold 4 model...")
+        model_file = "resnet50_fold_4.keras"
+        path = os.path.join(self.model_dir, model_file)
         
-        for f in model_files:
-            path = os.path.join(self.model_dir, f)
-            if os.path.exists(path):
+        if os.path.exists(path):
+            try:
+                print(f"Loading {model_file}...")
+                # Use compile=False and safe_mode=False for Keras 3.x models on Keras 2.x
+                self.model = tf.keras.models.load_model(path, compile=False, safe_mode=False)
+                print(f"Successfully loaded {model_file}.")
+            except TypeError:
+                # Fallback: older TF versions may not support safe_mode
                 try:
-                    print(f"Loading {f}...")
-                    model = tf.keras.models.load_model(path)
-                    self.models.append(model)
+                    self.model = tf.keras.models.load_model(path, compile=False)
+                    print(f"Successfully loaded {model_file} (fallback).")
                 except Exception as e:
-                    print(f"Failed to load {f}: {e}")
-            else:
-                print(f"Warning: Model file {f} not found.")
-
-        if not self.models:
-            print("⚠️ No models loaded! Demo mode logic would be needed (not implemented).")
+                    print(f"Failed to load {model_file}: {e}")
+            except Exception as e:
+                print(f"Failed to load {model_file}: {e}")
         else:
-            print(f"Successfully loaded {len(self.models)} models.")
+            print(f"Warning: Model file {model_file} not found at {path}.")
+
+        if self.model is None:
+            print("WARNING: No model loaded! Inference will not work.")
 
     # -------------------------------
     # Find last Conv2D layer (Grad-CAM)
     # -------------------------------
     def find_last_conv_layer(self, model):
-        # Specific known last layers for MobileNetV3 to try first
-        target_layers = ["Conv_1", "conv_1", "expanded_conv_15_project"]
+        # Specific known last conv layers for ResNet50 to try first
+        target_layers = ["conv5_block3_3_conv", "conv5_block3_out", "conv5_block3_2_conv"]
         for name in target_layers:
             try:
                 layer = model.get_layer(name)
-                if isinstance(layer, tf.keras.layers.Conv2D):
+                # In Keras 3, layers might have different class names
+                if "Conv2D" in str(type(layer)) or "Conv" in layer.name.lower():
                     return name
             except:
                 continue
                 
-        # Fallback: Just return the string name of the very last Conv2D layer in the list
+        # Fallback: Return the name of the very last layer that looks like a Conv layer
         last_conv = None
         for layer in model.layers:
-            if isinstance(layer, tf.keras.layers.Conv2D):
+            if "Conv" in str(type(layer)) or "conv" in layer.name.lower():
                 last_conv = layer.name
         return last_conv
 
     # -------------------------------
-    # Grad-CAM
+    # Grad-CAM Heatmap Generation
     # -------------------------------
     def make_gradcam_heatmap(self, img_array, pred_index):
         if not self.viz_model or not self.last_conv_layer_name:
              return None
 
+        # Build a model that maps input to last conv layer output and predictions
         grad_model = tf.keras.models.Model(
             inputs=self.viz_model.inputs,
             outputs=[
@@ -93,86 +94,78 @@ class DRModel:
         )
 
         with tf.GradientTape() as tape:
-            conv_out, preds = grad_model(img_array)
-            if isinstance(preds, list):
-                preds = preds[0]
-            class_score = preds[:, pred_index]
+            conv_outputs, predictions = grad_model(img_array)
+            if isinstance(predictions, list):
+                predictions = predictions[0]
+            
+            # Loss is the score for the target class
+            loss = predictions[:, pred_index]
 
-        grads = tape.gradient(class_score, conv_out)
+        # Extract gradients of the class score wrt the feature map
+        grads = tape.gradient(loss, conv_outputs)
+
+        # Pooled gradients across feature maps
+        # Note: If confidence is 1.0, grads can be very small (Softmax saturation)
+        # We can normalize them to ensure some signal remains
         pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
 
-        conv_out = conv_out[0]
-        heatmap = tf.reduce_sum(conv_out * pooled_grads, axis=-1)
+        # Weight the feature maps
+        conv_outputs = conv_outputs[0]
+        heatmap = conv_outputs @ pooled_grads[..., tf.newaxis]
+        heatmap = tf.squeeze(heatmap)
 
+        # Normalize [0, 1]
         heatmap = tf.maximum(heatmap, 0)
-        heatmap /= (tf.reduce_max(heatmap) + 1e-8)
-
+        max_val = tf.math.reduce_max(heatmap)
+        if max_val > 0:
+            heatmap /= max_val
+        
         return heatmap.numpy()
 
     # -------------------------------
-    # Prediction pipeline (Ensemble)
+    # Prediction pipeline (Single Model)
     # -------------------------------
     def predict(self, img_array, original_image_bgr):
         """
+        Expects:
+            img_array: Preprocessed (1, 224, 224, 3) batch (BGR)
+            original_image_bgr: Original image in BGR format for overlay
         Returns:
             label (str)
             confidence (float)
-            gradcam_overlay (np.ndarray)
+            gradcam_overlay (np.ndarray) - RGB
         """
-        if not self.models:
-            raise Exception("No models loaded for inference.")
+        if self.model is None:
+            raise Exception("No model loaded for inference.")
 
-        # -------------------------------
-        # ENSEMBLE INFERENCE
-        # -------------------------------
-        print(f"Running ensemble inference on shape: {img_array.shape}")
-        
-        all_preds = []
-        for i, model in enumerate(self.models):
-            try:
-                # verbosity=0 to keep logs clean
-                p = model.predict(img_array, verbose=0)[0] 
-                all_preds.append(p)
-            except Exception as e:
-                print(f"Model {i+1} failed: {e}")
+        # 1. Inference
+        try:
+            # Note: Ensure img_array matches model input expectation (RGB)
+            preds = self.model.predict(img_array, verbose=0)[0]
+        except Exception as e:
+            raise Exception(f"Model inference failed: {e}")
 
-        if not all_preds:
-            raise Exception("All models failed inference.")
-
-        # Soft Voting: Average probabilities
-        avg_preds = np.mean(all_preds, axis=0)
         print("\n--- DEBUG INFERENCE ---")
-        print("Raw Probability Vector:", avg_preds)
+        print("Raw Probability Vector:", preds)
         
-        pred_index = int(np.argmax(avg_preds))
-        confidence = float(avg_preds[pred_index])
+        pred_index = int(np.argmax(preds))
+        confidence = float(preds[pred_index])
         
         print(f"Predicted Class Index: {pred_index}")
         print(f"Confidence Score: {confidence:.4f}")
         print("-----------------------\n")
 
-        # -------------------------------
-        # Threshold Logic REMOVED per user request
-        # -------------------------------
-        # THRESH = 0.65
-        # if confidence < THRESH:
-        #     label = "Uncertain"
-        #     print(f"Confidence {confidence:.2f} < {THRESH}. Labeling as Uncertain.")
-        # else:
         label = CLASSES[pred_index]
-        print(f"Inferred Class: {label} (Idx: {pred_index})")
 
-        # -------------------------------
-        # Grad-CAM overlay
-        # -------------------------------
-        # Generate heatmap using the dominant class index, 
-        # using the first model (Fold 1) as representative.
+        # 2. Grad-CAM Overlay
         heatmap = None
         try:
-            # We visualize the class that had the highest average probability
             heatmap = self.make_gradcam_heatmap(img_array, pred_index)
-            
             if heatmap is not None:
+                # Gamma correction to enhance contrast
+                heatmap = np.power(heatmap, 0.6) 
+                
+                # Resize to cover original image
                 heatmap = cv2.resize(
                     heatmap,
                     (original_image_bgr.shape[1], original_image_bgr.shape[0])
@@ -182,17 +175,17 @@ class DRModel:
             heatmap = None
 
         if heatmap is not None:
-            heatmap = np.uint8(255 * heatmap)
-            heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
-            # Fix RGB/BGR compatibility
-            heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
+            # Map 0-1 to 0-255
+            heatmap_255 = np.uint8(255 * heatmap)
+            # applyColorMap returns BGR
+            heatmap_bgr = cv2.applyColorMap(heatmap_255, cv2.COLORMAP_JET)
 
+            # Blend with BGR original
             overlay = cv2.addWeighted(
                 original_image_bgr, 0.6,
-                heatmap, 0.4,
+                heatmap_bgr, 0.4,
                 0
             )
+            return label, confidence, overlay
         else:
-             overlay = original_image_bgr
-
-        return label, confidence, overlay
+            return label, confidence, original_image_bgr

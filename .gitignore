@@ -29,6 +29,20 @@ history.json
 uploads/
 reports/
 
+# Models & Large Files
+backend/new_models/
+backend/models/
+*.h5
+*.keras
+
+# Backend Logs & Tests
+backend/backend_log.txt
+backend/test_load.py
+backend/model_summary.txt
+backend/inspect_model_v3.py
+backend/debug_inference.py
+backend/pytest_vars2.py
+
 # IDEs
 .vscode/
 .idea/

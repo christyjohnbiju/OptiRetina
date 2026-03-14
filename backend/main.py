@@ -71,11 +71,9 @@ def upload_to_supabase(file_path: str, bucket: str, destination_name: str, conte
         return None
 
 # Initialize Model (Global load)
-print("Initializing AI Model...")
-# Initialize Model (Ensemble load)
-print("Initializing AI Ensemble...")
+print("Initializing AI Model (ResNet50 Fold 4)...")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_DIR = os.path.join(BASE_DIR, "models")
+MODEL_DIR = os.path.join(BASE_DIR, "new_models")
 dr_model = DRModel(MODEL_DIR)
 chatbot_service = ChatbotService()
 
@@ -85,7 +83,8 @@ HEALTH_TIPS = {
     "Moderate": ["Consult retina specialist.", "Consider laser therapy if needed.", "More frequent checkups (3-6 months)."],
     "Severe": ["Urgent ophthalmology referral.", "Glycemic control is critical.", "Possible surgical intervention."],
     "Proliferate_DR": ["Immediate treatment required.", "High risk of vision loss.", "Anti-VEGF or Pan-retinal photocoagulation."],
-    "Uncertain": ["Low confidence – requires ophthalmologist review.", "Please retake the image to ensure quality.", "Consult a doctor for manual diagnosis."]
+    "Uncertain": ["Low confidence – requires ophthalmologist review.", "Please retake the image to ensure quality.", "Consult a doctor for manual diagnosis."],
+    "Invalid_Image": ["The uploaded image does not appear to be a valid retina/fundus image.", "Please upload a clear picture of the retina for analysis."]
 }
 
 @app.get("/")
@@ -96,7 +95,7 @@ def read_root():
 def health_check():
     return {
         "status": "ok", 
-        "model_loaded": len(dr_model.models) > 0,
+        "model_loaded": dr_model.model is not None,
         "supabase_connected": supabase is not None
     }
 
@@ -156,16 +155,29 @@ async def analyze_retina(
         
         # 2. Preprocess
         print("Starting preprocessing...")
-        batch_img, processed_img_cv2, is_noisy = preprocess_image(content)
-        print(f"Preprocessing done. Batch shape: {batch_img.shape}, Original shape: {processed_img_cv2.shape}")
+        batch_img, processed_img_cv2, is_noisy, is_valid = preprocess_image(content)
         
-        # 3. Predict & Explain
-        print("Starting prediction...")
-        label, confidence, gradcam_img = dr_model.predict(batch_img, processed_img_cv2)
-        print(f"Prediction done. Label: {label}, Conf: {confidence}")
-        
-        # 4. Generate Report
-        tips = HEALTH_TIPS.get(label, ["Consult a doctor."])
+        if not is_valid:
+            print("Validation failed. Not a valid fundus image.")
+            label = "Invalid_Image"
+            confidence = 1.0
+            
+            import cv2
+            import numpy as np
+            nparr = np.frombuffer(content, np.uint8)
+            img_bgr = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            # Keep as BGR, but resize to standard for consistency
+            processed_img_cv2 = cv2.resize(img_bgr, (224, 224)) if img_bgr is not None else np.zeros((224,224,3), np.uint8)
+            gradcam_img = processed_img_cv2.copy()
+            tips = HEALTH_TIPS["Invalid_Image"]
+        else:
+            print(f"Preprocessing done. Batch shape: {batch_img.shape}, Original shape: {processed_img_cv2.shape}")
+            
+            # 3. Predict & Explain
+            print("Starting prediction...")
+            label, confidence, gradcam_img = dr_model.predict(batch_img, processed_img_cv2)
+            print(f"Prediction done. Label: {label}, Conf: {confidence}")
+            tips = HEALTH_TIPS.get(label, ["Consult a doctor."])
         pdf_filename = f"report_{file_id}.pdf"
         pdf_path = os.path.join(REPORT_DIR, pdf_filename)
         
