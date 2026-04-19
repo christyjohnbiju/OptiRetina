@@ -1,0 +1,72 @@
+﻿Loading model...
+Model Output Shape: (None, 5)
+Last Layer: dense <class 'keras.src.layers.core.dense.Dense'>
+Activation: softmax
+Model Input Shape: (None, 224, 224, 3)
+
+=== TESTING RECENT UPLOADS ===
+
+FILE: b013da06-8c14-42c4-9d03-6c65dd95c26c_bb7e0a2544cd.png
+  [0] No_DR: 0.999999 <-- PREDICTED
+  [1] Mild: 0.000000
+  [2] Moderate: 0.000000
+  [3] Severe: 0.000001
+  [4] Proliferative: 0.000000
+
+FILE: fe935a0a-51aa-486f-a4c0-c9779c6b2e5a_71a39c660432.png
+  [0] No_DR: 0.543415 <-- PREDICTED
+  [1] Mild: 0.002400
+  [2] Moderate: 0.000000
+  [3] Severe: 0.454186
+  [4] Proliferative: 0.000000
+
+FILE: ec3e4f02-bcf1-4706-9866-8b39e0c27115_a4d4b69f7404.png
+  [0] No_DR: 0.731474 <-- PREDICTED
+  [1] Mild: 0.020604
+  [2] Moderate: 0.000000
+  [3] Severe: 0.247922
+  [4] Proliferative: 0.000000
+
+FILE: 5e839c29-01ed-4a3b-b590-0b71104932a3_a9e984b57556.png
+  [0] No_DR: 0.999998 <-- PREDICTED
+  [1] Mild: 0.000002
+  [2] Moderate: 0.000000
+  [3] Severe: 0.000000
+  [4] Proliferative: 0.000000
+
+FILE: 9f692c1d-01e2-4f49-a80f-478c7db5b537_a9e984b57556.png
+  [0] No_DR: 0.999998 <-- PREDICTED
+  [1] Mild: 0.000002
+  [2] Moderate: 0.000000
+  [3] Severe: 0.000000
+  [4] Proliferative: 0.000000
+
+FILE: adf02a4e-b4fd-4a90-ac6b-e1e2a93a8519_a9e984b57556.png
+  [0] No_DR: 0.999998 <-- PREDICTED
+  [1] Mild: 0.000002
+  [2] Moderate: 0.000000
+  [3] Severe: 0.000000
+  [4] Proliferative: 0.000000
+
+FILE: 8ce5d0de-915c-4954-98b2-08c6ec2753d7_confusion matrix resnet.png
+  [0] No_DR: 0.452877
+  [1] Mild: 0.018233
+  [2] Moderate: 0.499866 <-- PREDICTED
+  [3] Severe: 0.029024
+  [4] Proliferative: 0.000000
+
+FILE: 0974f19f-63f0-4100-a86d-22f73535ca93_Providence College.jpg
+  [0] No_DR: 0.000000
+  [1] Mild: 0.000008
+  [2] Moderate: 0.000000
+  [3] Severe: 0.999992 <-- PREDICTED
+  [4] Proliferative: 0.000000
+
+
+=== PREPROCESSING COMPARISON (first image) ===
+
+FILE: b013da06-8c14-42c4-9d03-6c65dd95c26c_bb7e0a2544cd.png
+  BGR [-1,1]:    No_DR           (1.0000) | ['1.0000', '0.0000', '0.0000', '0.0000', '0.0000']
+  RGB [-1,1]:    Severe          (0.9599) | ['0.0140', '0.0050', '0.0211', '0.9599', '0.0000']
+  BGR [0,1]:     No_DR           (0.9308) | ['0.9308', '0.0011', '0.0000', '0.0681', '0.0000']
+  ImageNet:      Moderate        (1.0000) | ['0.0000', '0.0000', '1.0000', '0.0000', '0.0000']

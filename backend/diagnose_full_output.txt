@@ -1,0 +1,94 @@
+﻿Loading model...
+
+=== FULL COMPARISON (Last 15 uploads) ===
+
+FILE: 3cf898cf-c24c-419f-b467-0a33bacf64f7_04ac765f91a1.png
+  RGB [-1,1]:  Severe          (1.0000)
+  BGR [-1,1]:  Severe          (0.9431)
+  RGB [0,1]:   Severe          (1.0000)
+  ImageNet:    Moderate        (1.0000)
+
+FILE: 6c94634d-fd3d-4bac-9279-ff1b82610736_eba3acc42197.png
+  RGB [-1,1]:  Severe          (1.0000)
+  BGR [-1,1]:  Severe          (0.9498)
+  RGB [0,1]:   Severe          (0.9999)
+  ImageNet:    Moderate        (1.0000)
+
+FILE: 166705bf-1ea4-49c3-9e10-00f01c0363f0_a75bab2463d4.png
+  RGB [-1,1]:  Severe          (1.0000)
+  BGR [-1,1]:  No_DR           (1.0000)
+  RGB [0,1]:   Severe          (1.0000)
+  ImageNet:    Moderate        (1.0000)
+
+FILE: f1677fb9-bcfc-4a3b-bdbb-0b153cfdff72_2b48daf24be0.png
+  RGB [-1,1]:  Severe          (1.0000)
+  BGR [-1,1]:  Severe          (0.9556)
+  RGB [0,1]:   Severe          (0.9997)
+  ImageNet:    Moderate        (1.0000)
+
+FILE: 42b8b0bb-2bc5-45d2-9fb2-892ca81ed354_80e7cc0a0649.png
+  RGB [-1,1]:  Severe          (1.0000)
+  BGR [-1,1]:  Severe          (0.9987)
+  RGB [0,1]:   Severe          (0.9996)
+  ImageNet:    Severe          (1.0000)
+
+FILE: 447049b4-cd78-4874-b3f2-dd563b36e198_a8e88d4891c4.png
+  RGB [-1,1]:  Mild            (0.9673)
+  BGR [-1,1]:  No_DR           (1.0000)
+  RGB [0,1]:   Severe          (0.9959)
+  ImageNet:    Moderate        (1.0000)
+
+FILE: b013da06-8c14-42c4-9d03-6c65dd95c26c_bb7e0a2544cd.png
+  RGB [-1,1]:  Severe          (0.9599)
+  BGR [-1,1]:  No_DR           (1.0000)
+  RGB [0,1]:   Severe          (0.9988)
+  ImageNet:    Moderate        (1.0000)
+
+FILE: fe935a0a-51aa-486f-a4c0-c9779c6b2e5a_71a39c660432.png
+  RGB [-1,1]:  Severe          (1.0000)
+  BGR [-1,1]:  No_DR           (0.5434)
+  RGB [0,1]:   Severe          (0.9990)
+  ImageNet:    Moderate        (1.0000)
+
+FILE: ec3e4f02-bcf1-4706-9866-8b39e0c27115_a4d4b69f7404.png
+  RGB [-1,1]:  Severe          (1.0000)
+  BGR [-1,1]:  No_DR           (0.7315)
+  RGB [0,1]:   Severe          (0.9931)
+  ImageNet:    Moderate        (1.0000)
+
+FILE: 5e839c29-01ed-4a3b-b590-0b71104932a3_a9e984b57556.png
+  RGB [-1,1]:  Moderate        (0.8478)
+  BGR [-1,1]:  No_DR           (1.0000)
+  RGB [0,1]:   Severe          (0.9980)
+  ImageNet:    Moderate        (1.0000)
+
+FILE: 9f692c1d-01e2-4f49-a80f-478c7db5b537_a9e984b57556.png
+  RGB [-1,1]:  Moderate        (0.8478)
+  BGR [-1,1]:  No_DR           (1.0000)
+  RGB [0,1]:   Severe          (0.9980)
+  ImageNet:    Moderate        (1.0000)
+
+FILE: adf02a4e-b4fd-4a90-ac6b-e1e2a93a8519_a9e984b57556.png
+  RGB [-1,1]:  Moderate        (0.8478)
+  BGR [-1,1]:  No_DR           (1.0000)
+  RGB [0,1]:   Severe          (0.9980)
+  ImageNet:    Moderate        (1.0000)
+
+FILE: 8ce5d0de-915c-4954-98b2-08c6ec2753d7_confusion matrix resnet.png
+  RGB [-1,1]:  No_DR           (1.0000)
+  BGR [-1,1]:  Moderate        (0.4999)
+  RGB [0,1]:   No_DR           (0.9981)
+  ImageNet:    Moderate        (1.0000)
+
+FILE: 0974f19f-63f0-4100-a86d-22f73535ca93_Providence College.jpg
+  RGB [-1,1]:  No_DR           (0.9973)
+  BGR [-1,1]:  Severe          (1.0000)
+  RGB [0,1]:   No_DR           (0.9872)
+  ImageNet:    Moderate        (1.0000)
+
+FILE: 4a46d991-de37-4d07-b3e1-b281fad76b5c_PRCLogo.png
+  RGB [-1,1]:  Moderate        (1.0000)
+  BGR [-1,1]:  No_DR           (1.0000)
+  RGB [0,1]:   No_DR           (0.7536)
+  ImageNet:    Moderate        (1.0000)
+

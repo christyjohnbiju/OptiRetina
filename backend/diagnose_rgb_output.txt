@@ -1,0 +1,62 @@
+﻿Loading model...
+Model Output Shape: (None, 5)
+Model Input Shape: (None, 224, 224, 3)
+
+=== TESTING WITH RGB FIX (Recent Uploads) ===
+
+FILE: b013da06-8c14-42c4-9d03-6c65dd95c26c_bb7e0a2544cd.png
+  [0] No_DR: 0.014040
+  [1] Mild: 0.004955
+  [2] Moderate: 0.021110
+  [3] Severe: 0.959895 <-- PREDICTED
+  [4] Proliferative: 0.000000
+
+FILE: fe935a0a-51aa-486f-a4c0-c9779c6b2e5a_71a39c660432.png
+  [0] No_DR: 0.000002
+  [1] Mild: 0.000023
+  [2] Moderate: 0.000000
+  [3] Severe: 0.999975 <-- PREDICTED
+  [4] Proliferative: 0.000000
+
+FILE: ec3e4f02-bcf1-4706-9866-8b39e0c27115_a4d4b69f7404.png
+  [0] No_DR: 0.000001
+  [1] Mild: 0.000000
+  [2] Moderate: 0.000000
+  [3] Severe: 0.999999 <-- PREDICTED
+  [4] Proliferative: 0.000000
+
+FILE: 5e839c29-01ed-4a3b-b590-0b71104932a3_a9e984b57556.png
+  [0] No_DR: 0.000991
+  [1] Mild: 0.008261
+  [2] Moderate: 0.847814 <-- PREDICTED
+  [3] Severe: 0.142934
+  [4] Proliferative: 0.000000
+
+FILE: 9f692c1d-01e2-4f49-a80f-478c7db5b537_a9e984b57556.png
+  [0] No_DR: 0.000991
+  [1] Mild: 0.008261
+  [2] Moderate: 0.847814 <-- PREDICTED
+  [3] Severe: 0.142934
+  [4] Proliferative: 0.000000
+
+FILE: adf02a4e-b4fd-4a90-ac6b-e1e2a93a8519_a9e984b57556.png
+  [0] No_DR: 0.000991
+  [1] Mild: 0.008261
+  [2] Moderate: 0.847814 <-- PREDICTED
+  [3] Severe: 0.142934
+  [4] Proliferative: 0.000000
+
+FILE: 8ce5d0de-915c-4954-98b2-08c6ec2753d7_confusion matrix resnet.png
+  [0] No_DR: 0.999996 <-- PREDICTED
+  [1] Mild: 0.000004
+  [2] Moderate: 0.000000
+  [3] Severe: 0.000000
+  [4] Proliferative: 0.000000
+
+FILE: 0974f19f-63f0-4100-a86d-22f73535ca93_Providence College.jpg
+  [0] No_DR: 0.997282 <-- PREDICTED
+  [1] Mild: 0.000153
+  [2] Moderate: 0.000000
+  [3] Severe: 0.002564
+  [4] Proliferative: 0.000000
+

@@ -7,7 +7,7 @@ def is_fundus_image(img_rgb):
     Fundus images (even heavily preprocessed ones) should be mostly a circular disk of pixels inside a squarish bounding box.
     """
     try:
-        # Convert to grayscale
+
         gray = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2GRAY)
         
         # Identify background padding color from corners (could be black padding or gray padding)
@@ -181,4 +181,5 @@ def preprocess_image(image_bytes: bytes):
     batch_img = np.expand_dims(batch_input, axis=0)
 
     is_noisy = False
+    # Return: batch for model (BGR), resized image for Grad-CAM overlay (BGR)
     return batch_img, img_resized, is_noisy, is_valid

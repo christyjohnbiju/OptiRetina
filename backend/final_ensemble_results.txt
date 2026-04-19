@@ -1,0 +1,33 @@
+﻿Loading Ensemble Folds 1-4...
+
+=== FINAL ENSEMBLE VERIFICATION ===
+
+FILE: b013da06-8c14-42c4-9d03-6c65dd95c26c_bb7e0a2544cd.png
+  Ensemble Prediction: Moderate        (0.5066)
+  Probabilities:       ['0.28', '0.21', '0.51', '0.00', '0.00']
+
+FILE: 5e839c29-01ed-4a3b-b590-0b71104932a3_a9e984b57556.png
+  Ensemble Prediction: Moderate        (0.7146)
+  Probabilities:       ['0.25', '0.04', '0.71', '0.00', '0.00']
+
+--- Other recent samples ---
+FILE: 3cf898cf-c24c-419f-b467-0a33bacf64f7_04ac765f91a1.png
+  Ensemble Prediction: Moderate        (0.7463)
+  Probabilities:       ['0.01', '0.00', '0.75', '0.24', '0.00']
+
+FILE: 6c94634d-fd3d-4bac-9279-ff1b82610736_eba3acc42197.png
+  Ensemble Prediction: Moderate        (0.5022)
+  Probabilities:       ['0.01', '0.25', '0.50', '0.24', '0.00']
+
+FILE: 166705bf-1ea4-49c3-9e10-00f01c0363f0_a75bab2463d4.png
+  Ensemble Prediction: Moderate        (0.7148)
+  Probabilities:       ['0.25', '0.03', '0.71', '0.00', '0.00']
+
+FILE: f1677fb9-bcfc-4a3b-bdbb-0b153cfdff72_2b48daf24be0.png
+  Ensemble Prediction: Moderate        (0.5082)
+  Probabilities:       ['0.01', '0.24', '0.51', '0.24', '0.00']
+
+FILE: 42b8b0bb-2bc5-45d2-9fb2-892ca81ed354_80e7cc0a0649.png
+  Ensemble Prediction: Severe          (0.4993)
+  Probabilities:       ['0.00', '0.25', '0.25', '0.50', '0.00']
+

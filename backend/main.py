@@ -71,7 +71,7 @@ def upload_to_supabase(file_path: str, bucket: str, destination_name: str, conte
         return None
 
 # Initialize Model (Global load)
-print("Initializing AI Model (ResNet50 Fold 4)...")
+print("Initializing AI Model (ResNet50 Single Model)...")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, "new_models")
 dr_model = DRModel(MODEL_DIR)
@@ -166,8 +166,11 @@ async def analyze_retina(
             import numpy as np
             nparr = np.frombuffer(content, np.uint8)
             img_bgr = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            # Keep as BGR, but resize to standard for consistency
-            processed_img_cv2 = cv2.resize(img_bgr, (224, 224)) if img_bgr is not None else np.zeros((224,224,3), np.uint8)
+            # Keep as BGR for consistency with the ensembled BGR pipeline
+            if img_bgr is not None:
+                processed_img_cv2 = cv2.resize(img_bgr, (224, 224))
+            else:
+                processed_img_cv2 = np.zeros((224,224,3), np.uint8)
             gradcam_img = processed_img_cv2.copy()
             tips = HEALTH_TIPS["Invalid_Image"]
         else:
